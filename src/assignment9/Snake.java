@@ -2,6 +2,8 @@ package assignment9;
 
 import java.util.LinkedList;
 
+import edu.princeton.cs.introcs.StdDraw;
+
 public class Snake {
 
 	private static final double SEGMENT_SIZE = 0.02;
@@ -14,6 +16,9 @@ public class Snake {
 		//FIXME - set up the segments instance variable
 		deltaX = 0;
 		deltaY = 0;
+		this.segments = new LinkedList<BodySegment>(); 
+		BodySegment one = new BodySegment(deltaX, deltaY, SEGMENT_SIZE / 2);
+		segments.add(one);
 	}
 	
 	public void changeDirection(int direction) {
@@ -38,6 +43,17 @@ public class Snake {
 	 */
 	public void move() {
 		//FIXME
+		// have every segment behind the head follow the segment in front of it (eventually the segment behind the head follows the head)
+		for(int i = segments.size()-1; i > 0; i--) {	
+			BodySegment inFront = segments.get(i-1);
+			segments.get(i).setX(inFront.getX());
+			segments.get(i).setY(inFront.getY());
+		}
+		
+		// moves the head
+		BodySegment head = segments.getFirst();
+		head.setX(deltaX + head.getX());
+		head.setY(deltaY + head.getY());
 	}
 	
 	/**
@@ -45,6 +61,10 @@ public class Snake {
 	 */
 	public void draw() {
 		//FIXME
+		StdDraw.setPenColor(StdDraw.GREEN);
+		for(int i = 0; i < segments.size(); i++) { // or a while loop while segments != null
+			StdDraw.filledCircle(segments.get(i).getX(), segments.get(i).getY(), SEGMENT_SIZE / 2);
+		}
 	}
 	
 	/**
@@ -54,6 +74,15 @@ public class Snake {
 	 */
 	public boolean eatFood(Food f) {
 		//FIXME
+		BodySegment head = segments.getFirst();
+		double distanceX = head.getX() - f.getX(); 
+		double distanceY = head.getY() - f.getY(); 
+		double distance = Math.sqrt((Math.pow(distanceX, 2) + Math.pow(distanceY, 2)));
+		if (distance < SEGMENT_SIZE) {
+			BodySegment newTail = segments.getLast();
+			segments.addLast(new BodySegment(newTail.getX(), newTail.getY(), SEGMENT_SIZE / 2));
+			return true;
+		}
 		return false;
 	}
 	
@@ -63,6 +92,10 @@ public class Snake {
 	 */
 	public boolean isInbounds() {
 		//FIXME
-		return true;
+		BodySegment head = segments.getFirst();
+		double x = head.getX(); 
+		double y = head.getY();
+		boolean inBounds = x<=1 && x>=0 && y>=0 && y<=1; 
+		return inBounds;
 	}
 }
